@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 // Đổi port 5000 nếu server backend của bạn chạy port khác
-const API_URL = 'http://localhost:5000/api/ai';
+const API_URL = 'https://khkt-k2eu.onrender.com/api/ai';
 
 export const aiService = {
   translate: async (text) => {

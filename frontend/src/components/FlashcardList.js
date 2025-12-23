@@ -8,7 +8,7 @@ const FlashcardList = () => {
   useEffect(() => {
     const fetchCards = async () => {
       try {
-        const res = await fetch('http://localhost:5000/api/flashcards');
+        const res = await fetch('https://khkt-k2eu.onrender.com/api/flashcards');
         const data = await res.json();
         
         // --- ĐOẠN SỬA QUAN TRỌNG ---

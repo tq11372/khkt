@@ -46,7 +46,7 @@ const DictionaryPopup = ({ data, onClose, position }) => {
       // Nếu không có tiếng Việt thì mới dùng tiếng Anh
       const backContent = vietnamese ? vietnamese : firstDefinition;
 
-      const response = await fetch('http://localhost:5000/api/flashcards', {
+      const response = await fetch('https://khkt-k2eu.onrender.com/api/flashcards', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
