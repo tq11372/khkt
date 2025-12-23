@@ -36,7 +36,7 @@ router.get('/:word', async (req, res) => {
     // --- 2. GỌI AI ĐỂ DỊCH SANG TIẾNG VIỆT ---
     let vietnameseMeaning = "";
     try {
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
       const prompt = `Dịch từ tiếng Anh "${cleanWord}" sang tiếng Việt. Chỉ trả về 1-2 nghĩa thông dụng nhất, ngắn gọn, viết thường, cách nhau bởi dấu phẩy. Không giải thích thêm.`;
       
       const resultAI = await model.generateContent(prompt);
