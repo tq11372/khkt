@@ -5,7 +5,7 @@ import FlashcardList from './components/FlashcardList';
 import QuizModal from './components/QuizModal';
 import { newsAPI, aiAPI, dictionaryAPI } from './services/api';
 
-// --- 1. IMPORT CÁC TRANG MỚI (Đã thêm) ---
+// --- IMPORT CÁC TRANG MỚI ---
 import DictionaryPage from './components/pages/DictionaryPage';
 import StudyPage from './components/pages/StudyPage';
 
@@ -17,20 +17,26 @@ function App() {
   const [selectedArticle, setSelectedArticle] = useState(null);
   const [dictData, setDictData] = useState(null);
   const [popupPos, setPopupPos] = useState({ x: 0, y: 0 });
+  
+  // State cho Tóm tắt
   const [summary, setSummary] = useState(null);
   const [isSummarizing, setIsSummarizing] = useState(false);
+  
+  // State cho Quiz
   const [quizData, setQuizData] = useState(null);
   const [isCreatingQuiz, setIsCreatingQuiz] = useState(false);
+  
+  // State cho Đọc (TTS)
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [sentiment, setSentiment] = useState(null);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
+  // --- HÀM HỖ TRỢ ---
   const getRawText = (htmlContent) => {
     const div = document.createElement("div");
     div.innerHTML = htmlContent;
     return div.textContent || div.innerText || "";
   };
 
+  // --- XỬ LÝ TÓM TẮT ---
   const handleSummarize = async () => {
     if (!selectedArticle) return;
     setIsSummarizing(true);
@@ -45,6 +51,7 @@ function App() {
     }
   };
 
+  // --- XỬ LÝ TẠO QUIZ ---
   const handleCreateQuiz = async () => {
     if (!selectedArticle) return;
     setIsCreatingQuiz(true);
@@ -59,6 +66,7 @@ function App() {
     }
   };
 
+  // --- XỬ LÝ ĐỌC VĂN BẢN ---
   const handleTextToSpeech = async () => {
     if (isSpeaking) {
       if (window.currentAudio) {
@@ -103,20 +111,7 @@ function App() {
     }
   };
 
-  const handleSentiment = async () => {
-    if (!selectedArticle) return;
-    setIsAnalyzing(true);
-    try {
-      const textContent = getRawText(selectedArticle.content);
-      const res = await aiAPI.analyzeSentiment(textContent);
-      setSentiment(res);
-    } catch (err) {
-      alert("❌ Lỗi phân tích. Vui lòng thử lại!");
-    } finally {
-      setIsAnalyzing(false);
-    }
-  };
-
+  // --- XỬ LÝ BÔI ĐEN TRA TỪ ---
   const handleTextSelection = async () => {
     const selection = window.getSelection();
     const rawText = selection.toString();
@@ -140,6 +135,7 @@ function App() {
     }
   };
 
+  // --- INITIAL LOAD ---
   useEffect(() => {
     const fetchNews = async () => {
       try {
@@ -156,15 +152,16 @@ function App() {
     fetchNews();
   }, []);
 
+  // --- RESET STATE KHI ĐỔI BÀI ---
   const resetArticleState = () => {
     setSelectedArticle(null);
     setDictData(null);
     setSummary(null);
     setQuizData(null);
-    setSentiment(null);
     setIsSpeaking(false);
   };
 
+  // --- RENDER CHI TIẾT BÀI BÁO ---
   const renderArticleDetail = () => {
     if (!selectedArticle) return null;
 
@@ -198,22 +195,14 @@ function App() {
             </div>
           </div>
 
-          {/* AI TOOLBAR */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+          {/* AI TOOLBAR (Đã xóa nút Cảm xúc và chỉnh lại grid thành 3 cột) */}
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-8">
             <button
               onClick={handleSummarize}
               disabled={isSummarizing}
               className="btn bg-gradient-secondary text-white hover:shadow-xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSummarizing ? "⏳" : "✨"} <span className="hidden sm:inline">Tóm tắt</span>
-            </button>
-
-            <button
-              onClick={handleSentiment}
-              disabled={isAnalyzing}
-              className="btn bg-gradient-primary text-white hover:shadow-xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isAnalyzing ? "⏳" : "🔍"} <span className="hidden sm:inline">Cảm xúc</span>
             </button>
 
             <button
@@ -236,7 +225,7 @@ function App() {
             </button>
           </div>
 
-          {/* AI RESULTS */}
+          {/* AI RESULTS (Chỉ còn Tóm tắt) */}
           <div className="space-y-4 mb-10">
             {summary && (
               <div className="alert alert-info animate-slide-in-down">
@@ -244,23 +233,6 @@ function App() {
                 <div className="alert-content">
                   <div className="alert-title">Tóm tắt bởi AI</div>
                   <p className="text-slate-800">{summary}</p>
-                </div>
-              </div>
-            )}
-
-            {sentiment && (
-              <div className={`alert ${
-                sentiment.sentiment === 'Positive' ? 'alert-success' :
-                sentiment.sentiment === 'Negative' ? 'alert-danger' :
-                'alert-warning'
-              } animate-slide-in-down`}>
-                <div className="alert-icon">{sentiment.emoji}</div>
-                <div className="alert-content">
-                  <div className="alert-title">
-                    Sắc thái: <strong>{sentiment.sentiment}</strong>
-                  </div>
-                  <p className="text-sm">💯 Độ tin cậy: {sentiment.confidence}%</p>
-                  <p className="mt-2 italic">"{sentiment.explanation}"</p>
                 </div>
               </div>
             )}
@@ -307,15 +279,15 @@ function App() {
         resetArticleState();
       }} />
 
-      {/* --- 2. BỔ SUNG LOGIC ĐIỀU HƯỚNG MỚI Ở ĐÂY --- */}
+      {/* --- LOGIC ĐIỀU HƯỚNG --- */}
       {currentView === 'flashcards' ? (
         <FlashcardList />
-      ) : currentView === 'dictionary' ? ( // Trang Tra từ
+      ) : currentView === 'dictionary' ? (
         <DictionaryPage />
-      ) : currentView === 'study' ? ( // Trang Ôn tập
+      ) : currentView === 'study' ? (
         <StudyPage />
       ) : (
-        // Mặc định là Trang chủ (Home)
+        // TRANG CHỦ (Home)
         <>
           {selectedArticle ? (
             renderArticleDetail()
